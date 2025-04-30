@@ -6,6 +6,7 @@ import hypercorn
 import asyncio
 import logging
 from a2a_server import a2a_services
+from fastapi import FastAPI
 
 logger = logging.getLogger(__name__)
 
@@ -39,11 +40,16 @@ def main():
         )
         services = a2a_services(
             agent_name=agent_name,
-            agent_card=agent_card,
             agent=ReimbursementAgent(),
         )
 
-        app = restate.app(services=services)
+        app = FastAPI()
+
+        @app.get("/.well-known/agent.json")
+        async def agent_json():
+            return agent_card.model_dump()
+        
+        app.mount("/restate", restate.app(services=services))
 
         conf = hypercorn.Config()
         conf.bind = [AGENT_HOST]

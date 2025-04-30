@@ -12,7 +12,7 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
-from common.types import AgentCard, TextPart
+from common.types import TextPart
 
 logger = logging.getLogger(__name__)
 
@@ -170,49 +170,6 @@ class ReimbursementAgent(GenericAgent):
             require_user_input=False,
             is_task_complete=True,
         )
-
-    async def stream(self, query, session_id) -> AsyncIterable[Dict[str, Any]]:
-        session = self._runner.session_service.get_session(
-            app_name=self._agent.name, user_id=self._user_id, session_id=session_id
-        )
-        content = types.Content(role="user", parts=[types.Part.from_text(text=query)])
-        if session is None:
-            session = self._runner.session_service.create_session(
-                app_name=self._agent.name,
-                user_id=self._user_id,
-                state={},
-                session_id=session_id,
-            )
-        async for event in self._runner.run_async(
-            user_id=self._user_id, session_id=session.id, new_message=content
-        ):
-            if event.is_final_response():
-                response = ""
-                if (
-                    event.content
-                    and event.content.parts
-                    and event.content.parts[0].text
-                ):
-                    response = "\n".join(
-                        [p.text for p in event.content.parts if p.text]
-                    )
-                elif (
-                    event.content
-                    and event.content.parts
-                    and any([True for p in event.content.parts if p.function_response])
-                ):
-                    response = next(
-                        (p.function_response.model_dump() for p in event.content.parts)
-                    )
-                yield {
-                    "is_task_complete": True,
-                    "content": response,
-                }
-            else:
-                yield {
-                    "is_task_complete": False,
-                    "updates": "Processing the reimbursement request...",
-                }
 
     def _build_agent(self) -> LlmAgent:
         """Builds the LLM agent for the reimbursement agent."""

@@ -2,10 +2,8 @@ import logging
 import uuid
 from abc import ABC, abstractmethod
 
-import httpx
 from pydantic import BaseModel
 
-# from .agent_session import AgentInput, AgentResponse, Agent, run_agent_session
 import restate
 from datetime import datetime
 from restate.serde import PydanticJsonSerde
@@ -46,6 +44,10 @@ from common.types import (
     Part
 )
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] [%(process)d] [%(levelname)s] - %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -86,9 +88,8 @@ INVOCATION_ID = "invocation-id"
 
 def a2a_services(
     agent_name: str,
-    agent_card: AgentCard,
     agent: GenericAgent,
-) -> list[Union[restate.Service, restate.VirtualObject]]:
+) -> tuple[restate.Service, restate.VirtualObject]:
     """
     Creates an A2A server for reimbursement processing with customizable name and description.
 
@@ -100,11 +101,7 @@ def a2a_services(
     Returns:
         A configured restate Service instance
     """
-    a2a_server = restate.Service(f"{agent_name}A2AServer", agent_card.description)
-
-    @a2a_server.handler()
-    async def get_agent_card(ctx: restate.Context) -> AgentCard:
-        return agent_card
+    a2a_server = restate.Service(f"{agent_name}A2AServer")
 
     @a2a_server.handler()
     async def process_request(
@@ -152,7 +149,6 @@ def a2a_services(
     async def on_get_task(
         ctx: restate.Context, request: GetTaskRequest
     ) -> GetTaskResponse:
-        # Implementation of https://google.github.io/A2A/#/documentation?id=get-a-task
         logger.info(f"Getting task {request.params.id}")
         task_query_params: TaskQueryParams = request.params
 
@@ -172,7 +168,6 @@ def a2a_services(
     async def on_cancel_task(
         ctx: restate.Context, request: CancelTaskRequest
     ) -> CancelTaskResponse:
-        # Implementation of https://google.github.io/A2A/#/documentation?id=cancel-a-task
         logger.info(f"Cancelling task {request.params.id}")
         task_id_params: TaskIdParams = request.params
 
@@ -202,55 +197,12 @@ def a2a_services(
     async def on_set_task_push_notification(
         ctx: restate.Context, request: SetTaskPushNotificationRequest
     ) -> SetTaskPushNotificationResponse:
-        logger.info(f"Setting task push notification {request.params.id}")
-        task_notification_params: TaskPushNotificationConfig = request.params
-
-        task = await ctx.object_call(
-            get_task, key=task_notification_params.id, arg=None
-        )
-        if task is None:
-            return JSONRPCResponse(
-                id=request.id,
-                error=InternalError(
-                    message="An error occurred while setting push notification info"
-                ),
-            )
-
-        await ctx.object_call(
-            set_push_notification_info,
-            key=task_notification_params.id,
-            arg=task_notification_params.pushNotificationConfig,
-        )
-        return SetTaskPushNotificationResponse(
-            id=request.id, result=task_notification_params
-        )
+        raise restate.exceptions.TerminalError(f"Not implemented: {request.method}")
 
     async def on_get_task_push_notification(
         ctx: restate.Context, request: GetTaskPushNotificationRequest
     ) -> GetTaskPushNotificationResponse:
-        task_params: TaskIdParams = request.params
-        logger.info(f"Getting task push notification {task_params.id}")
-
-        task = await ctx.object_call(get_task, key=task_params.id, arg=None)
-        if task is None:
-            return GetTaskPushNotificationResponse(
-                id=request.id,
-                error=InternalError(
-                    message="An error occurred while getting push notification info"
-                ),
-            )
-
-        push_notification = await ctx.object_call(
-            get_push_notification_info, key=task_params.id, arg=None
-        )
-        result = (
-            TaskPushNotificationConfig(
-                id=task_params.id, pushNotificationConfig=push_notification.config
-            )
-            if push_notification.config
-            else None
-        )
-        return GetTaskPushNotificationResponse(id=request.id, result=result)
+        raise restate.exceptions.TerminalError(f"Not implemented: {request.method}")
 
     task_object = restate.VirtualObject(f"{agent_name}TaskObject")
 
@@ -274,7 +226,6 @@ def a2a_services(
     async def handle_send_task_request(
         ctx: restate.ObjectContext, request: SendTaskRequest
     ) -> SendTaskResponse:
-        # Implementation of https://google.github.io/A2A/#/documentation?id=send-a-task
         logger.info(
             "Starting task execution workflow %s for task %s",
             request.id,
@@ -338,10 +289,7 @@ def a2a_services(
         cancelled_task = await update_store(ctx, state=TaskState.CANCELED)
         return CancelTaskResponse(id=request.id, result=cancelled_task)
 
-    if isinstance(agent, GenericAgent):
-        return [a2a_server, task_object]
-    elif isinstance(agent, GenericRestateAgent):
-        return [a2a_server, task_object]
+    return a2a_server, task_object
 
 
 async def on_send_task_subscribe(
@@ -366,22 +314,8 @@ def _get_user_query(task_send_params: TaskSendParams) -> str:
 
 
 async def send_task_notification(self, ctx: restate.Context, task: Task):
-    push_info = await ctx.object_call(get_push_notification_info, key=task.id, arg=None)
-    if not push_info:
-        logger.info(f"No push notification info found for task {task.id}")
-        return
-
-    logger.info(f"Notifying for task {task.id} => {task.status.state}")
-
-    # TODO we ignore authentication for now
-    # will keep retrying until it succeeds
-    def send_notification() -> dict[str, Any]:
-        response = httpx.post(push_info.url, json=task.model_dump(exclude_none=True))
-        response.raise_for_status()
-        return response.json()
-
-    await ctx.run("Push notification", send_notification)
-    logger.info(f"Push-notification sent for URL: {push_info.url}")
+    logger.info(f"No push notification info found for task {task.id}")
+    return
 
 
 async def set_invocation_id(ctx: restate.ObjectContext, invocation_id: str):
@@ -453,30 +387,3 @@ async def update_store(
 
     ctx.set(TASK, task)
     return task
-
-
-push_notification_manager = restate.VirtualObject("PushNotificationManager")
-
-
-class OptionalPushNotificationConfig(BaseModel):
-    config: PushNotificationConfig | None = None
-
-
-@push_notification_manager.handler(kind="shared")
-async def get_push_notification_info(
-    ctx: restate.ObjectSharedContext,
-) -> OptionalPushNotificationConfig:
-    task_id = ctx.key()
-    logger.info(f"Getting push notifications task {task_id}")
-    return OptionalPushNotificationConfig(
-        config=await ctx.get(PUSH_NOTIFICATION_INFO, type_hint=PushNotificationConfig)
-    )
-
-
-@push_notification_manager.handler()
-async def set_push_notification_info(
-    ctx: restate.ObjectContext, notification_config: PushNotificationConfig
-):
-    task_id = ctx.key()
-    logger.info(f"Setting push notifications task {task_id}")
-    ctx.set(PUSH_NOTIFICATION_INFO, notification_config)
