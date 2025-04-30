@@ -17,6 +17,7 @@ members = [
     "a2a-samples-file-chat",
     "a2a-samples-image-gen",
     "a2a-samples-marvin",
+    "a2a-samples-restate",
     "a2a-semantic-kernel",
 ]
 
@@ -194,6 +195,27 @@ dependencies = [
 requires-dist = [
     { name = "a2a-samples", editable = "." },
     { name = "marvin", specifier = ">=3.0.0" },
+]
+
+[[package]]
+name = "a2a-samples-restate"
+version = "0.1.0"
+source = { virtual = "agents/restate" }
+dependencies = [
+    { name = "a2a-samples" },
+    { name = "google-adk" },
+    { name = "google-genai" },
+    { name = "hypercorn" },
+    { name = "restate-sdk" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "a2a-samples", editable = "." },
+    { name = "google-adk", specifier = ">=0.0.3" },
+    { name = "google-genai", specifier = ">=1.9.0" },
+    { name = "hypercorn" },
+    { name = "restate-sdk", specifier = ">=0.7.0" },
 ]
 
 [[package]]
@@ -1913,6 +1935,21 @@ wheels = [
 ]
 
 [[package]]
+name = "hypercorn"
+version = "0.17.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "h11" },
+    { name = "h2" },
+    { name = "priority" },
+    { name = "wsproto" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7e/3a/df6c27642e0dcb7aff688ca4be982f0fb5d89f2afd3096dc75347c16140f/hypercorn-0.17.3.tar.gz", hash = "sha256:1b37802ee3ac52d2d85270700d565787ab16cf19e1462ccfa9f089ca17574165", size = 44409 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0e/3b/dfa13a8d96aa24e40ea74a975a9906cfdc2ab2f4e3b498862a57052f04eb/hypercorn-0.17.3-py3-none-any.whl", hash = "sha256:059215dec34537f9d40a69258d323f56344805efb462959e727152b0aa504547", size = 61742 },
+]
+
+[[package]]
 name = "hyperframe"
 version = "6.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3577,6 +3614,15 @@ wheels = [
 ]
 
 [[package]]
+name = "priority"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f5/3c/eb7c35f4dcede96fca1842dac5f4f5d15511aa4b52f3a961219e68ae9204/priority-2.0.0.tar.gz", hash = "sha256:c965d54f1b8d0d0b19479db3924c7c36cf672dbf2aec92d43fbdaf4492ba18c0", size = 24792 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5e/5f/82c8074f7e84978129347c2c6ec8b6c59f3584ff1a20bc3c940a3e061790/priority-2.0.0-py3-none-any.whl", hash = "sha256:6f8eefce5f3ad59baf2c080a664037bb4725cd0a790d53d59ab4059288faf6aa", size = 8946 },
+]
+
+[[package]]
 name = "prompt-toolkit"
 version = "3.0.51"
 source = { registry = "https://pypi.org/simple" }
@@ -4345,6 +4391,29 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f3/61/d7545dafb7ac2230c70d38d31cbfe4cc64f7144dc41f6e4e4b78ecd9f5bb/requests-toolbelt-1.0.0.tar.gz", hash = "sha256:7681a0a3d047012b5bdc0ee37d7f8f07ebe76ab08caeccfc3921ce23c88d5bc6", size = 206888 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3f/51/d4db610ef29373b879047326cbf6fa98b6c1969d6f6dc423279de2b1be2c/requests_toolbelt-1.0.0-py2.py3-none-any.whl", hash = "sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06", size = 54481 },
+]
+
+[[package]]
+name = "restate-sdk"
+version = "0.7.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/55/e3/1b53fc9ef59e5fba8ba91d13302760f2b64fcda84769ae6efc46f02ec19c/restate_sdk-0.7.0.tar.gz", hash = "sha256:868db768832d1cbb46f739a63fd5bcfe86846b46e006fa7eb6e89258e1c4c1f9", size = 59034 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/13/af/f1d634195e505fe15752b96a0819b802e3b9dc4e3129c8b6831faff97c08/restate_sdk-0.7.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:01519d69c81f3a6530ff406a5520f60e3c4f450bbc36d980538667f687a90271", size = 1789471 },
+    { url = "https://files.pythonhosted.org/packages/33/50/354d1f0984a98778091c1dcffb1b61093130682be44417d1b6577d397998/restate_sdk-0.7.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:172d21cc94d97c2ff58312e0bea9775169713e7c7e8eb1c616ca2c1bc90f9f30", size = 1714408 },
+    { url = "https://files.pythonhosted.org/packages/4e/f8/804fa98c295a76fdc18b6fd3891bd0a4eed34fea03c62b8d1ce3e3d9aa00/restate_sdk-0.7.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e41bc0872a65cb15588213857782c328f86b28de1380db5ed7056df0c27f5ebb", size = 1972993 },
+    { url = "https://files.pythonhosted.org/packages/27/05/36f58ad8010ab03afefd03537f099057065dec859447a546c2dd3253d978/restate_sdk-0.7.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:b63b79256fcaf236da2b9568a0ba140887d253e970db5edcab7b9bb57c3df5be", size = 1938816 },
+    { url = "https://files.pythonhosted.org/packages/80/3b/1f24786cb487ca6937d6063af603796e1582cd14e953ee85eb4b23bb6bd5/restate_sdk-0.7.0-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:7b692f8ce83b7b3f99409e7a49337b416a90f998025ac6e480775544671eb586", size = 2126588 },
+    { url = "https://files.pythonhosted.org/packages/1d/cd/c6026ebdeecf03bb95b2e8db1413fff8252381ac4a16429d1e08b019c31a/restate_sdk-0.7.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:f07e80e0571a319cbcf0d999ee0117b1c2799030dca9a59bf93273e0d19507d9", size = 2139500 },
+    { url = "https://files.pythonhosted.org/packages/82/4c/741bf759f3714ba54c6c40c71280018032881e97b1a80a0a994f63fb1aca/restate_sdk-0.7.0-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:20be01eb871dfc256a308df95800e4a8c8a19074ecdd46a8b443122962910b05", size = 1789765 },
+    { url = "https://files.pythonhosted.org/packages/8d/1b/4d493beed1ae0aaaa186666799c22b96f74a7d83ef1257a67aad7724dc04/restate_sdk-0.7.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:1fd27156a660d320f7078c355a37d5a9be578b8eedb6b3056373070b94eff935", size = 1714641 },
+    { url = "https://files.pythonhosted.org/packages/ce/0f/19f9955ac4697c45d50cb5f60edb9159875936651fe6168c9ccc7bf65b40/restate_sdk-0.7.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a9b2f77658e197a1d1546493906c31e340ebd59c9839c325c2bc077774e09aef", size = 1973285 },
+    { url = "https://files.pythonhosted.org/packages/38/7a/b49b91230a771e72585a3da6fe7d7faf3ad71e773bf20f01da696e72fb23/restate_sdk-0.7.0-cp313-cp313-manylinux_2_28_aarch64.whl", hash = "sha256:99ca8f5e00053d04877db0edefe0778f8bb5616cd01a6ef48bc80b23cd7bea51", size = 1939180 },
+    { url = "https://files.pythonhosted.org/packages/b9/bf/70956b17c02971ad759aee00143108cef4bc2df21bdf8a64de670b1f11bc/restate_sdk-0.7.0-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:accf4f669bfaf616ab5a0b9a417a116bb4cf62e96ef3610ced31ffe63f575a8f", size = 2126551 },
+    { url = "https://files.pythonhosted.org/packages/2a/1d/de6bb463a974cd53ab0701594ae4066ea0994e9e8aa4697d89d11f0a22d9/restate_sdk-0.7.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:d46d1cd9a11ee849357c1ab8050698e579a790431af47c3b6cd2a81b173fb607", size = 2139573 },
+    { url = "https://files.pythonhosted.org/packages/94/18/4cbbb787bd8ae7eaa6f60dacd4c8ff8946261e03c0cfa40bbfdfabb7e7bc/restate_sdk-0.7.0-cp313-cp313t-manylinux_2_28_aarch64.whl", hash = "sha256:798f293b9b936cc37e1b2bd3b01133c910bc4b6069208f9f208c0bd7c3e46697", size = 1939295 },
+    { url = "https://files.pythonhosted.org/packages/11/c0/1f902d3c6f0bf8f95f8d5f3086ba436b496feae56886d08051d29b2d6ac6/restate_sdk-0.7.0-cp313-cp313t-musllinux_1_2_aarch64.whl", hash = "sha256:0843070afec674474474105a024c6f5c559b88e0d3e90ec4593bb4888946e197", size = 2127078 },
+    { url = "https://files.pythonhosted.org/packages/f0/74/1cff3450000a2d668578b6b2b8dfe7df1c907a1b9596f10c7c71c8e2e8f4/restate_sdk-0.7.0-cp313-cp313t-musllinux_1_2_x86_64.whl", hash = "sha256:2d1653498488a6c43d55c9cbf5d004a2ba383fcb386b30df1f27cfaedd3075dc", size = 2139994 },
 ]
 
 [[package]]
@@ -5189,6 +5258,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/6a/e1/0122853035b40b3f333bbb25f1939fc1045e21dd518f7f0922b60c156f7c/wrapt-1.17.2-cp313-cp313t-win32.whl", hash = "sha256:13e6afb7fe71fe7485a4550a8844cc9ffbe263c0f1a1eea569bc7091d4898555", size = 37986 },
     { url = "https://files.pythonhosted.org/packages/09/5e/1655cf481e079c1f22d0cabdd4e51733679932718dc23bf2db175f329b76/wrapt-1.17.2-cp313-cp313t-win_amd64.whl", hash = "sha256:eaf675418ed6b3b31c7a989fd007fa7c3be66ce14e5c3b27336383604c9da85c", size = 40750 },
     { url = "https://files.pythonhosted.org/packages/2d/82/f56956041adef78f849db6b289b282e72b55ab8045a75abad81898c28d19/wrapt-1.17.2-py3-none-any.whl", hash = "sha256:b18f2d1533a71f069c7f82d524a52599053d4c7166e9dd374ae2136b7f40f7c8", size = 23594 },
+]
+
+[[package]]
+name = "wsproto"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "h11" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c9/4a/44d3c295350d776427904d73c189e10aeae66d7f555bb2feee16d1e4ba5a/wsproto-1.2.0.tar.gz", hash = "sha256:ad565f26ecb92588a3e43bc3d96164de84cd9902482b130d0ddbaa9664a85065", size = 53425 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/78/58/e860788190eba3bcce367f74d29c4675466ce8dddfba85f7827588416f01/wsproto-1.2.0-py3-none-any.whl", hash = "sha256:b9acddd652b585d75b20477888c56642fdade28bdfd3579aa24a4d2c037dd736", size = 24226 },
 ]
 
 [[package]]
