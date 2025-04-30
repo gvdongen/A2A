@@ -2,8 +2,8 @@ import json
 import random
 import logging
 import time
-from typing import Any, AsyncIterable, Dict, Optional
-from a2a_server import GenericAgent, AgentInvokeResult
+from typing import Any, Optional
+from a2a_server import AgentInvokeResult
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.tools.tool_context import ToolContext
 from google.adk.artifacts import InMemoryArtifactService
@@ -120,7 +120,7 @@ def reimburse(request_id: str) -> dict[str, Any]:
     return {"request_id": request_id, "status": "approved"}
 
 
-class ReimbursementAgent(GenericAgent):
+class ReimbursementAgent():
     """An agent that handles reimbursement requests."""
 
     SUPPORTED_CONTENT_TYPES = ["text", "text/plain"]

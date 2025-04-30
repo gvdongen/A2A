@@ -58,28 +58,6 @@ class AgentInvokeResult(BaseModel):
     require_user_input: bool
     is_task_complete: bool
 
-class GenericAgent(ABC):
-
-    async def invoke_with_context(
-        self, ctx: restate.ObjectContext, query: str, session_id: str
-    ) -> AgentInvokeResult:
-        """
-        Invoke the agent with a context.
-        """
-        return await ctx.run(
-            "Agent invoke",
-            lambda: self.invoke(
-                query=query,
-                session_id=session_id,
-            ),
-            type_hint=AgentInvokeResult,
-        )
-
-    @abstractmethod
-    def invoke(self, query: str, session_id: str) -> AgentInvokeResult:
-        pass
-
-
 
 # K/V stored in Restate
 TASK = "task"
@@ -88,14 +66,13 @@ INVOCATION_ID = "invocation-id"
 
 def a2a_services(
     agent_name: str,
-    agent: GenericAgent,
+    agent,
 ) -> tuple[restate.Service, restate.VirtualObject]:
     """
     Creates an A2A server for reimbursement processing with customizable name and description.
 
     Args:
         agent_name: Name of the A2A server
-        agent_card: AgentCard object containing agent information
         agent: Agent object that implements the invoke method
 
     Returns:
@@ -247,10 +224,13 @@ def a2a_services(
 
         try:
             # Forward the request to the agent
-            result = await agent.invoke_with_context(
-                ctx,
-                query=_get_user_query(task_send_params),
-                session_id=task_send_params.sessionId,
+            result = await ctx.run(
+                "Agent invoke",
+                lambda: agent.invoke(
+                    query=_get_user_query(task_send_params),
+                    session_id=task_send_params.sessionId,
+                ),
+                type_hint=AgentInvokeResult,
             )
 
             if result.require_user_input:
