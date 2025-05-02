@@ -42,14 +42,14 @@ async def process_request(request: dict):
         # restate's a2a middleware (see below) automatically creates a restate service (https://docs.restate.dev/concepts/services/)
         # for the agent to drive it's computation durably.
         # The service name is the agent name + "A2AServer" (e.g. ReimbursementAgentA2AServer)
-        # And the main handler is "process_request"
+        # And the main handler is "process_request".
+        #
+        # You can skip this step and call the restate service directly by exposing it at the agent's url card.
         #
         restate_service = f"{AGENT_CARD.name}A2AServer"
         restate_handler = "process_request"
-        response = await client.post(
-            f"{RESTATE_HOST}/{restate_service}/{restate_handler}",
-            json=request,
-        )
+        url = f"{RESTATE_HOST}/{restate_service}/{restate_handler}"
+        response = await client.post(url, json=request)
         response.raise_for_status()
         return response.json()
 
