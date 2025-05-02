@@ -1,13 +1,11 @@
 import logging
 import uuid
-from abc import ABC, abstractmethod
+from datetime import datetime
+from typing import Union, AsyncIterable, List, Any
 
 from pydantic import BaseModel
-
 import restate
-from datetime import datetime
 from restate.serde import PydanticJsonSerde
-from typing import Union, AsyncIterable, List, Any
 
 from common.types import (
     SendTaskRequest,
@@ -21,7 +19,6 @@ from common.types import (
     JSONRPCResponse,
     SendTaskStreamingRequest,
     SendTaskStreamingResponse,
-    AgentCard,
     A2ARequest,
     GetTaskRequest,
     CancelTaskRequest,
@@ -35,9 +32,6 @@ from common.types import (
     TaskNotFoundError,
     TaskQueryParams,
     TaskIdParams,
-    TaskPushNotificationConfig,
-    InternalError,
-    PushNotificationConfig,
     JSONRPCError,
     JSONRPCRequest,
     Message,
