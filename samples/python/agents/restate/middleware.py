@@ -113,12 +113,10 @@ def a2a_services(
                     message=f"Unexpected request type: {json_rpc_request.method}",
                 )
 
-            logger.info(
-                f"Processed request: {json_rpc_request.method} => {result.model_dump_json(exclude_none=True)}"
-            )
+            logger.info("Processed request: %s => %s", json_rpc_request.method, result.model_dump_json(exclude_none=True))
             return result
         except restate.exceptions.TerminalError as e:
-            logger.error(f"Error processing request: {e}")
+            logger.error("Error processing request: %s", e)
             return JSONRPCResponse(
                 id=req.id,
                 error=JSONRPCError(code=e.status_code, message=e.message),
@@ -127,7 +125,7 @@ def a2a_services(
     async def on_get_task(
         ctx: restate.Context, request: GetTaskRequest
     ) -> GetTaskResponse:
-        logger.info(f"Getting task {request.params.id}")
+        logger.info("Getting task %s", request.params.id)
         task_query_params: TaskQueryParams = request.params
 
         task = await ctx.object_call(get_task, key=task_query_params.id, arg=None)
@@ -146,7 +144,7 @@ def a2a_services(
     async def on_cancel_task(
         ctx: restate.Context, request: CancelTaskRequest
     ) -> CancelTaskResponse:
-        logger.info(f"Cancelling task {request.params.id}")
+        logger.info("Cancelling task %s", request.params.id)
         task_id_params: TaskIdParams = request.params
 
         task = await ctx.object_call(get_task, key=task_id_params.id, arg=None)
@@ -189,7 +187,7 @@ def a2a_services(
         ctx: restate.ObjectSharedContext,
     ) -> str | None:
         task_id = ctx.key()
-        logger.info(f"Getting invocation id for task {task_id}")
+        logger.info("Getting invocation id for task %s", task_id)
         return await ctx.get(INVOCATION_ID) or None
 
     @task_object.handler(output_serde=PydanticJsonSerde(Task), kind="shared")
@@ -197,7 +195,7 @@ def a2a_services(
         ctx: restate.ObjectSharedContext,
     ) -> Task | None:
         task_id = ctx.key()
-        logger.info(f"Getting task {task_id}")
+        logger.info("Getting task %s", task_id)
         return await ctx.get(TASK, type_hint=Task) or None
 
     @task_object.handler()
@@ -251,15 +249,15 @@ def a2a_services(
             return SendTaskResponse(id=request.id, result=updated_task)
         except restate.exceptions.TerminalError as e:
             if e.status_code == 409 and e.message == "cancelled":
-                logger.info(f"Task {task_send_params.id} was cancelled")
+                logger.info("Task %s was cancelled", task_send_params.id)
                 cancelled_task = await update_store(ctx, state=TaskState.CANCELED)
                 ctx.clear(INVOCATION_ID)
                 return SendTaskResponse(id=request.id, result=cancelled_task)
-            else:
-                logger.error(f"Error while processing task {task_send_params.id}: {e}")
-                failed_task = await update_store(ctx, state=TaskState.FAILED)
-                ctx.clear(INVOCATION_ID)
-                return SendTaskResponse(id=request.id, result=failed_task)
+
+            logger.error("Error while processing task %s: %s" ,task_send_params.id, e)
+            failed_task = await update_store(ctx, state=TaskState.FAILED)
+            ctx.clear(INVOCATION_ID)
+            return SendTaskResponse(id=request.id, result=failed_task)
 
     # Gets called for tasks with no ongoing invocations
     # e.g. waiting for user input
@@ -293,15 +291,9 @@ def _get_user_query(task_send_params: TaskSendParams) -> str:
         raise restate.exceptions.TerminalError("Only text parts are supported")
     return part.text
 
-
-async def send_task_notification(self, ctx: restate.Context, task: Task):
-    logger.info(f"No push notification info found for task {task.id}")
-    return
-
-
 async def set_invocation_id(ctx: restate.ObjectContext, invocation_id: str):
     task_id = ctx.key()
-    logger.info(f"Adding invocation id {invocation_id} for task {task_id}")
+    logger.info("Adding invocation id %s for task %s", invocation_id, task_id)
     current_invocation_id = await ctx.get(INVOCATION_ID)
     if current_invocation_id is not None:
         raise restate.exceptions.TerminalError(
@@ -314,7 +306,7 @@ async def upsert_task(
     ctx: restate.ObjectContext, task_send_params: TaskSendParams
 ) -> Task:
     task_id = ctx.key()
-    logger.info(f"Upserting task {task_id}")
+    logger.info("Upserting task %s", task_id)
 
     task_state = await ctx.get(TASK, type_hint=Task)
     if task_state is None:
@@ -342,7 +334,7 @@ async def update_store(
     artifacts: List[Artifact] | None = None,
 ) -> Task:
     task_id = ctx.key()
-    logger.info(f"Updating status task {task_id} to {state}")
+    logger.info("Updating status task %s to %s", task_id, state)
 
     task = await ctx.get(TASK, type_hint=Task)
     if task is None:
