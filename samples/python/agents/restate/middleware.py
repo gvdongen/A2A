@@ -1,13 +1,15 @@
 import logging
 import uuid
 from datetime import datetime
-from typing import Union, AsyncIterable, List, Any
+from typing import Union, AsyncIterable, List, Iterable
 
+import httpx
 from pydantic import BaseModel
 import restate
 from restate.serde import PydanticJsonSerde
 
 from common.types import (
+    AgentCard,
     SendTaskRequest,
     TaskSendParams,
     TaskStatus,
@@ -57,16 +59,55 @@ class AgentInvokeResult(BaseModel):
 TASK = "task"
 INVOCATION_ID = "invocation-id"
 
-def a2a(agent_name: str, agent: Any, **opts):
+
+class AgentMiddleware(Iterable[Union[restate.Service, restate.VirtualObject]]):
     """
-    Creates an A2A server 
+    Middleware for the agent to handle task processing and state management.
     """
-    services = a2a_services(agent_name=agent_name, agent=agent)
-    return restate.app(services=services, **opts)
+
+    def __init__(self, agent_card: AgentCard, agent):
+        self.agent_card = agent_card
+        self.agent = agent
+        self.a2a_server_name = f"{self.agent_card.name}A2AServer"
+        self.task_object_name = f"{self.agent_card.name}TaskObject"
+        self.process_request_url = f"{self.a2a_server_name}/process_request"
+        self.restate_services = a2a(agent_card, agent)
 
 
-def a2a_services(
-    agent_name: str,
+    def __iter__(self):
+        """
+        Returns the services that define the agent's a2a server and task object.
+        """
+        return iter(self.restate_services)
+
+    @property
+    def agent_card_json(self):
+        """return the agent card"""
+        return self.agent_card.model_dump()
+
+    @property
+    def services(self) -> List[restate.Service, restate.VirtualObject]:
+        """return the services that define the agent's a2a server and task object"""
+        return self.restate_services
+
+    @property
+    def url(self) -> str:
+        """return the base url for the agent's a2a server"""
+        return self.process_request_url
+
+    async def forward_to_restate(self, client: httpx.AsyncClient, request: dict) -> JSONRPCResponse:
+        """
+        Forward the request to the agent's a2a server for processing.
+        """
+        response = await client.post(self.process_request_url, json=request)
+        response.raise_for_status()
+        return response.json()
+    
+
+
+
+def a2a(
+    agent_card: AgentCard,
     agent,
 ) -> tuple[restate.Service, restate.VirtualObject]:
     """
@@ -79,7 +120,7 @@ def a2a_services(
     Returns:
         A configured restate Service instance
     """
-    a2a_server = restate.Service(f"{agent_name}A2AServer")
+    a2a_server = restate.Service(f"{agent_card.name}A2AServer")
 
     @a2a_server.handler()
     async def process_request(
