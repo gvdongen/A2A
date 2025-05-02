@@ -1,67 +1,70 @@
-from agent import ReimbursementAgent
-from common.types import MissingAPIKeyError, AgentCapabilities, AgentCard, AgentSkill
-import restate
+"""A an example of serving a resilient agent using restate.dev"""
 import os
-import hypercorn
-import asyncio
-import logging
-from a2a_server import a2a_services
 from fastapi import FastAPI
+import httpx
 
-logger = logging.getLogger(__name__)
+from agent import ReimbursementAgent
+import middleware
+
+from common.types import AgentCapabilities, AgentCard, AgentSkill
 
 RESTATE_HOST = os.getenv("RESTATE_HOST", "http://localhost:8080")
 AGENT_HOST = os.getenv("AGENT_HOST", "0.0.0.0:9080")
 
+AGENT_CARD = AgentCard(
+    name="ReimbursementAgent",
+    description="This agent handles the reimbursement process for the employees given the amount and purpose of the reimbursement.",
+    url=f"{AGENT_HOST}/process_request",
+    version="1.0.0",
+    defaultInputModes=ReimbursementAgent.SUPPORTED_CONTENT_TYPES,
+    defaultOutputModes=ReimbursementAgent.SUPPORTED_CONTENT_TYPES,
+    capabilities=AgentCapabilities(streaming=False),
+    skills=[
+        AgentSkill(id="process_reimbursement",
+                   name="Process Reimbursement Tool",
+                   description="Helps with the reimbursement process for users given the amount and purpose of the reimbursement.",
+                   tags=["reimbursement"],
+                   examples=["Can you reimburse me $20 for my lunch with the clients?"])],
+)
+
+app = FastAPI()
+
+@app.get("/.well-known/agent.json")
+async def agent_json():
+    """server the agent card"""
+    return AGENT_CARD.model_dump()
+
+@app.post("/process_request")
+async def process_request(request: dict):
+    """Forward the request to the agent server for processing"""
+    async with httpx.AsyncClient() as client:
+        #
+        # restate's a2a middleware (see below) automatically creates a restate service (https://docs.restate.dev/concepts/services/)
+        # for the agent to drive it's computation durably.
+        # The service name is the agent name + "A2AServer" (e.g. ReimbursementAgentA2AServer)
+        # And the main handler is "process_request"
+        #
+        restate_service = f"{AGENT_CARD.name}A2AServer"
+        restate_handler = "process_request"
+        response = await client.post(
+            f"{RESTATE_HOST}/{restate_service}/{restate_handler}",
+            json=request,
+        )
+        response.raise_for_status()
+        return response.json()
+
+app.mount("/restate/v1", middleware.a2a(AGENT_CARD.name, ReimbursementAgent()))
 
 def main():
-    try:
-        if not os.getenv("GOOGLE_API_KEY"):
-            raise MissingAPIKeyError("GOOGLE_API_KEY environment variable not set.")
+    """Serve the agent at port 9080"""
+    import asyncio
+    import hypercorn
+    import hypercorn.asyncio
 
-        capabilities = AgentCapabilities(streaming=False)
-        skill = AgentSkill(
-            id="process_reimbursement",
-            name="Process Reimbursement Tool",
-            description="Helps with the reimbursement process for users given the amount and purpose of the reimbursement.",
-            tags=["reimbursement"],
-            examples=["Can you reimburse me $20 for my lunch with the clients?"],
-        )
-        agent_name = "ReimbursementAgent"
-        agent_card = AgentCard(
-            name=agent_name,
-            description="This agent handles the reimbursement process for the employees given the amount and purpose of the reimbursement.",
-            url=f"{RESTATE_HOST}/{agent_name}A2AServer/process_request",
-            version="1.0.0",
-            defaultInputModes=ReimbursementAgent.SUPPORTED_CONTENT_TYPES,
-            defaultOutputModes=ReimbursementAgent.SUPPORTED_CONTENT_TYPES,
-            capabilities=capabilities,
-            skills=[skill],
-        )
-        services = a2a_services(
-            agent_name=agent_name,
-            agent=ReimbursementAgent(),
-        )
-
-        app = FastAPI()
-
-        @app.get("/.well-known/agent.json")
-        async def agent_json():
-            return agent_card.model_dump()
-        
-        app.mount("/restate", restate.app(services=services))
-
-        conf = hypercorn.Config()
-        conf.bind = [AGENT_HOST]
-        asyncio.run(hypercorn.asyncio.serve(app, conf))
-
-    except MissingAPIKeyError as e:
-        logger.error(f"Error: {e}")
-        exit(1)
-    except Exception as e:
-        logger.error(f"An error occurred during server startup: {e}")
-        exit(1)
-
+   
+    conf = hypercorn.Config()
+    conf.bind = [AGENT_HOST]
+    asyncio.run(hypercorn.asyncio.serve(app, conf))
 
 if __name__ == "__main__":
     main()

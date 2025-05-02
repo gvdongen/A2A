@@ -1,9 +1,14 @@
+"""
+An agent that handles reimbursement requests. Pretty much a copy of the
+reimbursement agent from this repo, just made the tools a bit more interesting.
+"""
+
+from typing import Any, Optional
 import json
 import random
 import logging
 import time
-from typing import Any, Optional
-from a2a_server import AgentInvokeResult
+
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.tools.tool_context import ToolContext
 from google.adk.artifacts import InMemoryArtifactService
@@ -11,8 +16,9 @@ from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
-
 from common.types import TextPart
+
+from agents.restate.middleware import AgentInvokeResult
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +55,7 @@ def create_request_form(
             else purpose
         ),
     }
-    logger.info(f"Reimbursement request created: {json.dumps(reimbursement)}")
+    logger.info("Reimbursement request created: %s", json.dumps(reimbursement))
 
     return reimbursement
 
@@ -106,7 +112,7 @@ def return_form(
         "form_data": form_request,
         "instructions": instructions,
     }
-    logger.info(f"Return form created: {json.dumps(form_dict)}")
+    logger.info("Return form created: %s", json.dumps(form_dict))
     return json.dumps(form_dict)
 
 
@@ -116,7 +122,7 @@ def reimburse(request_id: str) -> dict[str, Any]:
         return {"request_id": request_id, "status": "Error: Invalid request_id."}
 
     time.sleep(2000)
-    logger.info(f"Reimbursement approved: {request_id}")
+    logger.info("Reimbursement approved: %s", request_id)
     return {"request_id": request_id, "status": "approved"}
 
 
@@ -137,7 +143,7 @@ class ReimbursementAgent():
         )
 
     def invoke(self, query, session_id) -> AgentInvokeResult:
-        logger.info(f"Invoking LLM")
+        logger.info("Invoking LLM")
         session = self._runner.session_service.get_session(
             app_name=self._agent.name, user_id=self._user_id, session_id=session_id
         )
@@ -154,7 +160,7 @@ class ReimbursementAgent():
                 user_id=self._user_id, session_id=session.id, new_message=content
             )
         )
-        logger.info(f"LLM response: {events}")
+        logger.info("LLM response: %s", events)
         if not events or not events[-1].content or not events[-1].content.parts:
             return AgentInvokeResult(
                 parts=[TextPart(text="")],

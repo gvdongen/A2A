@@ -63,6 +63,13 @@ class AgentInvokeResult(BaseModel):
 TASK = "task"
 INVOCATION_ID = "invocation-id"
 
+def a2a(agent_name: str, agent: Any, **opts):
+    """
+    Creates an A2A server 
+    """
+    services = a2a_services(agent_name=agent_name, agent=agent)
+    return restate.app(services=services, **opts)
+
 
 def a2a_services(
     agent_name: str,
