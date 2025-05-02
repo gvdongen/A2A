@@ -53,7 +53,7 @@ def main():
     import hypercorn.asyncio
 
     conf = hypercorn.Config()
-    conf.bind = [AGENT_PORT]
+    conf.bind = [f"0.0.0.0:{AGENT_PORT}"]
     asyncio.run(hypercorn.asyncio.serve(app, conf))
 
 if __name__ == "__main__":
