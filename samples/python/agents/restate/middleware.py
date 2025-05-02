@@ -71,7 +71,10 @@ class AgentMiddleware(Iterable[Union[restate.Service, restate.VirtualObject]]):
         self.a2a_server_name = f"{self.agent_card.name}A2AServer"
         self.task_object_name = f"{self.agent_card.name}TaskObject"
         self.process_request_url = f"{self.a2a_server_name}/process_request"
-        self.restate_services = a2a(agent_card, agent)
+        self.restate_services = []
+        
+        _build_a2a_server_service(self)
+        _build_a2a_task_object_service(self)
 
 
     def __iter__(self):
@@ -86,7 +89,7 @@ class AgentMiddleware(Iterable[Union[restate.Service, restate.VirtualObject]]):
         return self.agent_card.model_dump()
 
     @property
-    def services(self) -> List[restate.Service, restate.VirtualObject]:
+    def services(self) -> Iterable[restate.Service, restate.VirtualObject]:
         """return the services that define the agent's a2a server and task object"""
         return self.restate_services
 
@@ -102,11 +105,16 @@ class AgentMiddleware(Iterable[Union[restate.Service, restate.VirtualObject]]):
         response = await client.post(self.process_request_url, json=request)
         response.raise_for_status()
         return response.json()
-    
 
 
+def _build_a2a_server_service(middleware: AgentMiddleware):
+    pass
 
-def a2a(
+def _build_a2a_task_object_service(middleware: AgentMiddleware):
+    pass
+
+
+def build_services(
     agent_card: AgentCard,
     agent,
 ) -> tuple[restate.Service, restate.VirtualObject]:
