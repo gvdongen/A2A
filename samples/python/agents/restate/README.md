@@ -1,6 +1,15 @@
-## ADK Agent
+## Resilient Agents with Restate
 
-This sample uses [Restate](https://restate.dev/) and the Agent Development Kit (ADK) to create a simple "Expense Reimbursement" agent that is hosted as an A2A server.
+This sample uses [Restate](https://restate.dev/) and the Agent Development Kit (ADK) to create a resilient "Expense Reimbursement" agent that is hosted as an A2A server.
+
+Restate acts as a scalable, resilient task orchestrator that speaks the A2A protocol and gives you:
+- **Automatic retries of failed tasks**: for example, LLM API downtime, timeouts, infrastructure failures, etc.
+- **Recovery of progress**: Restate preserves progress across failures, recovering exactly where tasks left off without duplicating work.
+- **Persistent task handle for long-running tasks**: Restate keeps track of a task's progress across failures, time and processes. Whether tasks execute in milliseconds or months (e.g. human-in-the-loop).
+- **Task control**: Restate allows canceling tasks, querying their status, and re-subscribing to ongoing tasks (e.g. when client loses connection).
+- **Idempotent task submission**: The Restate A2A server automatically deduplicates requests on task ID. On a retry, the server will attach you to the original request.
+- **Observability**: Restate provides a web UI to visualize the task progress and status. If you also implement the agent itself with Restate, then you can see the end-to-end task execution log. 
+- **Long-running Agents with workflow semantics**: implement resilient agentic workflows including human-in-the-loop steps, parallel tool execution, durable session state, and scheduling capabilities.
 
 This agent takes text requests from the client and, if any details are missing, returns a webform for the client (or its user) to fill out. 
 After the client fills out the form, the agent will complete the task.
