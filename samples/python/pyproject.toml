@@ -25,6 +25,7 @@ members = [
     "agents/google_adk",
     "agents/langgraph",
     "agents/marvin",
+    "agents/restate",
     "hosts/cli",
     "hosts/multiagent",
     "agents/llama_index_file_chat",
