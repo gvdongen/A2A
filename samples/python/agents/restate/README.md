@@ -8,8 +8,8 @@ Restate acts as a scalable, resilient task orchestrator that speaks the A2A prot
 - **Persistent task handle for long-running tasks**: Restate keeps track of a task's progress across failures, time and processes. Whether tasks execute in milliseconds or months (e.g. human-in-the-loop).
 - **Task control**: Restate allows canceling tasks, querying their status, and re-subscribing to ongoing tasks (e.g. when client loses connection).
 - **Idempotent task submission**: The Restate A2A server automatically deduplicates requests on task ID. On a retry, the server will attach you to the original request.
-- **Observability**: Restate provides a web UI to visualize the task progress and status. If you also implement the agent itself with Restate, then you can see the end-to-end task execution log. 
 - **Long-running Agents with workflow semantics**: implement resilient agentic workflows including human-in-the-loop steps, parallel tool execution, durable session state, and scheduling capabilities.
+- **Observability**: Restate provides a web UI to visualize the task progress and status. If you also implement the agent itself with Restate, then you can see the end-to-end task execution log.
 
 This agent takes text requests from the client and, if any details are missing, returns a webform for the client (or its user) to fill out. 
 After the client fills out the form, the agent will complete the task.
@@ -38,21 +38,7 @@ After the client fills out the form, the agent will complete the task.
     uv run .
     ```
    
-6. Start the Restate Server with npx or Docker ([for other options check the docs](https://docs.restate.dev/develop/local_dev#running-restate-server--cli-locally)). 
-
-   **Option 1: with npx**
-   
-   ```shell
-   npx @restatedev/restate-server
-   ```
-   
-   Let Restate know where the A2A server is running:
-   
-   ```shell
-   npx @restatedev/restate deployments register http://localhost:9080
-   ```
-   
-   **Option 2: with Docker**
+6. Start the Restate Server with Docker ([for other options check the docs](https://docs.restate.dev/develop/local_dev#running-restate-server--cli-locally)).
    
    ```shell
    docker run --name restate_dev --rm -p 8080:8080 -p 9070:9070 -p 9071:9071 \
@@ -62,7 +48,7 @@ After the client fills out the form, the agent will complete the task.
    Let Restate know where the A2A server is running:
    ```shell
    docker run -it --network=host docker.restate.dev/restatedev/restate-cli:1.3 \
-     deployments register http://host.docker.internal:9080
+     deployments register http://host.docker.internal:9080/restate/v1
    ```
 
 5. In a separate terminal, run the A2A client:
@@ -74,3 +60,5 @@ After the client fills out the form, the agent will complete the task.
     # If you changed the port when starting the agent, use that port instead
     # uv run . --agent http://localhost:YOUR_PORT
     ```
+
+6. Send requests with the A2A client like: `Reimburse my flight of 700 USD`

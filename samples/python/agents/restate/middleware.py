@@ -181,9 +181,10 @@ def _build_services(middleware: AgentMiddleware):
                 # Forward the request to the agent
                 result = await ctx.run(
                     "Agent invoke",
-                    lambda: agent.invoke(
-                        query=_get_user_query(task_send_params),
-                        session_id=task_send_params.sessionId,
+                    agent.invoke,
+                    args=(
+                        _get_user_query(task_send_params),
+                        task_send_params.sessionId,
                     ),
                     type_hint=AgentInvokeResult,
                 )
@@ -335,13 +336,12 @@ def _build_services(middleware: AgentMiddleware):
             logger.info("Sending task %s", request.params.id)
             task_send_params: TaskSendParams = request.params
 
-            task = await ctx.object_call(
+            return await ctx.object_call(
                 TaskObject.handle_send_task_request,
                 key=task_send_params.id,
                 arg=request,
                 idempotency_key=str(request.id),
             )
-            return SendTaskResponse(id=request.id, result=task)
 
         @staticmethod
         async def on_get_task(
