@@ -8,10 +8,6 @@ from agent import ReimbursementAgent
 from middleware import AgentMiddleware
 
 from common.types import AgentCapabilities, AgentCard, AgentSkill, MissingAPIKeyError
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 RESTATE_HOST = os.getenv("RESTATE_HOST", "http://localhost:8080")
 AGENT_HOST = os.getenv("AGENT_HOST", "http://localhost")
