@@ -335,13 +335,12 @@ def _build_services(middleware: AgentMiddleware):
             logger.info("Sending task %s", request.params.id)
             task_send_params: TaskSendParams = request.params
 
-            task = await ctx.object_call(
+            return await ctx.object_call(
                 TaskObject.handle_send_task_request,
                 key=task_send_params.id,
                 arg=request,
                 idempotency_key=str(request.id),
             )
-            return SendTaskResponse(id=request.id, result=task)
 
         @staticmethod
         async def on_get_task(

@@ -7,7 +7,11 @@ import restate
 from agent import ReimbursementAgent
 from middleware import AgentMiddleware
 
-from common.types import AgentCapabilities, AgentCard, AgentSkill
+from common.types import AgentCapabilities, AgentCard, AgentSkill, MissingAPIKeyError
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 RESTATE_HOST = os.getenv("RESTATE_HOST", "http://localhost:8080")
 AGENT_HOST = os.getenv("AGENT_HOST", "http://localhost")
@@ -36,12 +40,12 @@ app = FastAPI()
 @app.get("/.well-known/agent.json")
 async def agent_json():
     """server the agent card"""
-    return REIMBURSEMENT_AGENT.agent_card_json()
+    return REIMBURSEMENT_AGENT.agent_card_json
 
 @app.post("/process_request")
 async def process_request(request: dict):
     """Forward the request to the agent server for processing"""
-    async with httpx.AsyncClient(base_url=RESTATE_HOST) as client:
+    async with httpx.AsyncClient(base_url=RESTATE_HOST, timeout=30) as client:
         return await REIMBURSEMENT_AGENT.forward_to_restate(client, request)
 
 app.mount("/restate/v1", restate.app(REIMBURSEMENT_AGENT))
@@ -51,6 +55,11 @@ def main():
     import asyncio
     import hypercorn
     import hypercorn.asyncio
+
+    if not os.getenv('GOOGLE_API_KEY'):
+        raise MissingAPIKeyError(
+            'GOOGLE_API_KEY environment variable not set.'
+        )
 
     conf = hypercorn.Config()
     conf.bind = [f"0.0.0.0:{AGENT_PORT}"]
