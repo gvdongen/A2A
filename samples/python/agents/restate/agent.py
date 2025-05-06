@@ -142,7 +142,7 @@ class ReimbursementAgent():
             memory_service=InMemoryMemoryService(),
         )
 
-    def invoke(self, query, session_id) -> AgentInvokeResult:
+    async def invoke(self, query, session_id) -> AgentInvokeResult:
         logger.info("Invoking LLM")
         session = self._runner.session_service.get_session(
             app_name=self._agent.name, user_id=self._user_id, session_id=session_id
@@ -155,11 +155,15 @@ class ReimbursementAgent():
                 state={},
                 session_id=session_id,
             )
-        events = list(
-            self._runner.run(
-                user_id=self._user_id, session_id=session.id, new_message=content
-            )
-        )
+
+        events = []
+        async for event in self._runner.run_async(
+            user_id=self._user_id,
+            session_id=session_id,
+            new_message=content,
+        ):
+          events.append(event)
+
         logger.info("LLM response: %s", events)
         if not events or not events[-1].content or not events[-1].content.parts:
             return AgentInvokeResult(

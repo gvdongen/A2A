@@ -45,7 +45,7 @@ async def agent_json():
 @app.post("/process_request")
 async def process_request(request: dict):
     """Forward the request to the agent server for processing"""
-    async with httpx.AsyncClient(base_url=RESTATE_HOST, timeout=30) as client:
+    async with httpx.AsyncClient(base_url=RESTATE_HOST, timeout=None) as client:
         return await REIMBURSEMENT_AGENT.forward_to_restate(client, request)
 
 app.mount("/restate/v1", restate.app(REIMBURSEMENT_AGENT))
