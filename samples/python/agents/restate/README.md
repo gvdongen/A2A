@@ -73,3 +73,8 @@ Open the Restate UI ([http://localhost:9070](http://localhost:9070)) to see the 
 
 <img src="https://raw.githubusercontent.com/restatedev/img/refs/heads/main/a2a/journal.png" width="900px" alt="Example of Restate journal view"/>
 <img src="https://raw.githubusercontent.com/restatedev/img/refs/heads/main/a2a/state.png" width="900px" alt="Example of Restate state view"/>
+
+# Learn more
+- [Restate Website](https://restate.dev/)
+- [Restate Documentation](https://docs.restate.dev/)
+- [Restate GitHub repo](https://github.com/restatedev/restate)
