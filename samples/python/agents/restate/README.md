@@ -49,12 +49,12 @@ After the client fills out the form, the agent will complete the task.
    ```shell
    docker run --name restate_dev --rm -p 8080:8080 -p 9070:9070 -p 9071:9071 \
      -e RESTATE_WORKER__INVOKER__INACTIVITY_TIMEOUT=5min -e RESTATE_WORKER__INVOKER__ABORT_TIMEOUT=5min  \
-     --add-host=host.docker.internal:host-gateway docker.restate.dev/restatedev/restate:1.3
+     --add-host=host.docker.internal:host-gateway docker.restate.dev/restatedev/restate:latest
    ```
    
    Let Restate know where the A2A server is running:
    ```shell
-   docker run -it --network=host docker.restate.dev/restatedev/restate-cli:1.3 \
+   docker run -it --network=host docker.restate.dev/restatedev/restate-cli:latest \
      deployments register http://host.docker.internal:9080/restate/v1
    ```
 

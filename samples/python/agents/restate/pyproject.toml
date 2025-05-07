@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "a2a-samples",
-    "restate-sdk[all]>=0.7.0",
+    "restate-sdk[all]>=0.7.1",
     "hypercorn",
     "google-adk>=0.0.3",
     "google-genai>=1.9.0",
