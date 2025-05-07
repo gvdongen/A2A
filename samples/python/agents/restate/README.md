@@ -54,7 +54,7 @@ After the client fills out the form, the agent will complete the task.
 5. In a separate terminal, run the A2A client:
     ```
     # Connect to the agent (specify the agent URL with correct port)
-    cd sample[README.md](README.md)s/python/hosts/cli
+    cd samples/python/hosts/cli
     uv run . --agent http://localhost:9080
 
     # If you changed the port when starting the agent, use that port instead

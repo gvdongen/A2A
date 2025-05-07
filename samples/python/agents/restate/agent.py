@@ -120,8 +120,6 @@ def reimburse(request_id: str) -> dict[str, Any]:
     """Reimburse the amount of money to the employee for a given request_id."""
     if request_id not in request_ids:
         return {"request_id": request_id, "status": "Error: Invalid request_id."}
-
-    time.sleep(2)
     logger.info("Reimbursement approved: %s", request_id)
     return {"request_id": request_id, "status": "approved"}
 
