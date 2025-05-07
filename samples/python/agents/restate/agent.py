@@ -7,7 +7,6 @@ from typing import Any, Optional
 import json
 import random
 import logging
-import time
 
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.tools.tool_context import ToolContext
@@ -43,6 +42,7 @@ def create_request_form(
     Returns:
         dict[str, Any]: A dictionary containing the request form data.
     """
+    logger.info("Creating reimbursement request")
     request_id = "request_id_" + str(random.randint(1000000, 9999999))
     request_ids.add(request_id)
     reimbursement = {
@@ -76,6 +76,7 @@ def return_form(
     Returns:
         dict[str, Any]: A JSON dictionary for the form response.
     """
+    logger.info("Creating return form")
     if isinstance(form_request, str):
         form_request = json.loads(form_request)
 
@@ -116,8 +117,9 @@ def return_form(
     return json.dumps(form_dict)
 
 
-def reimburse(request_id: str) -> dict[str, Any]:
+async def reimburse(request_id: str) -> dict[str, Any]:
     """Reimburse the amount of money to the employee for a given request_id."""
+    logger.info("Starting reimbursement: %s", request_id)
     if request_id not in request_ids:
         return {"request_id": request_id, "status": "Error: Invalid request_id."}
     logger.info("Reimbursement approved: %s", request_id)
@@ -147,7 +149,7 @@ class ReimbursementAgent():
         )
         content = types.Content(role="user", parts=[types.Part.from_text(text=query)])
         if session is None:
-            session = self._runner.session_service.create_session(
+            self._runner.session_service.create_session(
                 app_name=self._agent.name,
                 user_id=self._user_id,
                 state={},
