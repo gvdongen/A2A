@@ -121,7 +121,7 @@ def reimburse(request_id: str) -> dict[str, Any]:
     if request_id not in request_ids:
         return {"request_id": request_id, "status": "Error: Invalid request_id."}
 
-    time.sleep(2000)
+    time.sleep(2)
     logger.info("Reimbursement approved: %s", request_id)
     return {"request_id": request_id, "status": "approved"}
 

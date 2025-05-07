@@ -54,7 +54,7 @@ After the client fills out the form, the agent will complete the task.
 5. In a separate terminal, run the A2A client:
     ```
     # Connect to the agent (specify the agent URL with correct port)
-    cd samples/python/hosts/cli
+    cd sample[README.md](README.md)s/python/hosts/cli
     uv run . --agent http://localhost:9080
 
     # If you changed the port when starting the agent, use that port instead
@@ -62,3 +62,8 @@ After the client fills out the form, the agent will complete the task.
     ```
 
 6. Send requests with the A2A client like: `Reimburse my flight of 700 USD`
+
+Open the Restate UI ([http://localhost:9070](http://localhost:9070)) to see the task execution log and the task state.
+
+<img src="https://raw.githubusercontent.com/restatedev/img/refs/heads/main/a2a/journal.png" width="900px" alt="Example of Restate journal view"/>
+<img src="https://raw.githubusercontent.com/restatedev/img/refs/heads/main/a2a/state.png" width="900px" alt="Example of Restate state view"/>
