@@ -5,8 +5,11 @@ from fastapi import FastAPI
 import restate
 from agent import ReimbursementAgent
 from middleware import AgentMiddleware
+from dotenv import load_dotenv
 
 from common.types import AgentCapabilities, AgentCard, AgentSkill, MissingAPIKeyError
+
+load_dotenv()
 
 RESTATE_HOST = os.getenv("RESTATE_HOST", "http://localhost:8080")
 
