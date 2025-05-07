@@ -2,8 +2,9 @@
 
 This sample uses [Restate](https://ai.restate.dev/) and the Agent Development Kit (ADK) to create a resilient "Expense Reimbursement" agent that is hosted as an A2A server.
 
+Restate lets you build resilient applications easily. It provides a distributed durable version of your everyday building blocks.
 
-Restate acts as a scalable, resilient task orchestrator that speaks the A2A protocol and gives you:
+In this example, Restate acts as a scalable, resilient task orchestrator that speaks the A2A protocol and gives you:
 - 🔁 **Automatic retries** - Handles LLM API downtime, timeouts, and infrastructure failures
 - 🔄 **Smart recovery** - Preserves progress across failures without duplicating work
 - ⏱️ **Persistent task handles** - Tracks progress across failures, time, and processes
