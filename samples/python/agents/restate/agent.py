@@ -219,6 +219,3 @@ class ReimbursementAgent():
                 return_form,
             ],
         )
-
-
-reimbursement_agent = ReimbursementAgent()

@@ -4,7 +4,6 @@ import uuid
 from datetime import datetime
 from typing import Union, AsyncIterable, List, Iterable
 
-import httpx
 from pydantic import BaseModel
 import restate
 from restate.serde import PydanticJsonSerde
@@ -41,6 +40,8 @@ from common.types import (
     Part
 )
 
+
+
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] [%(process)d] [%(levelname)s] - %(message)s",
@@ -61,18 +62,22 @@ class AgentInvokeResult(BaseModel):
 TASK = "task"
 INVOCATION_ID = "invocation-id"
 
-
 class AgentMiddleware(Iterable[Union[restate.Service, restate.VirtualObject]]):
     """
     Middleware for the agent to handle task processing and state management.
     """
 
     def __init__(self, agent_card: AgentCard, agent):
-        self.agent_card = agent_card
+        self.agent_card = agent_card.model_copy()
         self.agent = agent
         self.a2a_server_name = f"{self.agent_card.name}A2AServer"
         self.task_object_name = f"{self.agent_card.name}TaskObject"
-        self.process_request_url = f"{self.a2a_server_name}/process_request"
+
+        # replace the base url with the exact url of the process_request handler.
+        restate_base_url = self.agent_card.url
+        process_request_url = f"{restate_base_url}/{self.a2a_server_name}/process_request"
+        self.agent_card.url = process_request_url
+
         self.restate_services = []
         _build_services(self)
 
@@ -92,21 +97,6 @@ class AgentMiddleware(Iterable[Union[restate.Service, restate.VirtualObject]]):
     def services(self) -> Iterable[Union[restate.Service, restate.VirtualObject]]:
         """return the services that define the agent's a2a server and task object"""
         return self.restate_services
-
-    @property
-    def url(self) -> str:
-        """return the base url for the agent's a2a server"""
-        return self.process_request_url
-
-    async def forward_to_restate(self, client: httpx.AsyncClient, request: dict) -> JSONRPCResponse:
-        """
-        Forward the request to the agent's a2a server for processing.
-        """
-        response = await client.post(self.process_request_url, json=request)
-        response.raise_for_status()
-        return response.json()
-
-
 
 def _build_services(middleware: AgentMiddleware):
     """
